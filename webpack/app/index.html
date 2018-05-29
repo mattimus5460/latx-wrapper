@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>LATX Wrapper</title>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+  <script src="./app.js"></script>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ" crossorigin="anonymous">
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
+</head>
+<body>
+  <h1>LATX Wrapper</h1>
+  <h2>UI for conversion between LATX and LATXW</h2>
+  <p>LATXW is a wrapper token for LATX that supports the full <a href="https://github.com/ethereum/EIPs/issues/20" target="_blank">ERC-20 token standard</a>.</p>
+  <p>The LATXW smart contract allows you to convert back and forth between <a href="https://etherscan.io/token/0x2f85e502a988af76f7ee6d83b7db8d6c0a823bf9" target="_blank">LATX</a> and <a href="https://etherscan.io/token/" target="_blank">LATXW</a></p>
+
+  <h3>Pick an address</h3>
+  <div class="btn-group">
+    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+      <span id="address"></span> <span class="caret"></span>
+    </button>
+    <ul class="dropdown-menu" id="addresses">
+    </ul>
+  </div>
+
+  <div id="balanceLATX"></div>
+  <div id="balanceLATXW"></div>
+
+  <h3>Convert LATX &#8212;&gt; LATXW</h3>
+
+  <p class="step">Step 1: Generate personal deposit address.</p>
+
+  <div id="depositAddress"></div>
+
+  <p class="step">Step 2: Send LATX to personal deposit address.</p>
+
+  <div id="sendLATX"></div>
+
+  <p class="step">Step 3: Process deposit.</p>
+
+  <div id="currentDeposit"></div>
+  <div id="processDeposit"></div>
+
+  <h3>Convert LATXW &#8212;&gt; LATX</h3>
+
+  <div id="withdraw"></div>
+
+</body>
+</html>
