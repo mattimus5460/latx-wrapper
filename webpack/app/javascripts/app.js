@@ -21,10 +21,10 @@ window.App = {
     start: function () {
         var self = this;
 
-        LATXWAddr = '0x09babEC11BbBFD8Bd1C8225a786F280fD61d9b26';
+        LATXWAddr = '0x13274fe19c0178208bcbee397af8167a7be27f6f';
         LATXW = web3.eth.contract(LATXWContract.abi).at(LATXWAddr);
 
-        LATXAddr = '0x676445b98b215367c4C8efDCAE660FE86379Cd64';
+        LATXAddr = '0xeec918d74c746167564401103096d45bbd494b74';
         LATX = web3.eth.contract(LATXContract.abi).at(LATXAddr);
 
         // Get the initial account balance so it can be displayed.
@@ -78,10 +78,10 @@ window.App = {
             $('#balanceLATX').html('<p>Balance (LATX): ' + balanceLATX + '</p>');
         });
         LATXW.balanceOf(account, function (err, balance) {
-            var balanceLATXW = web3.fromWei(balance, "ether");
+            var balanceLATXW = new BigNumber(balance).div(Math.pow(10, 8));
             $('#balanceLATXW').html('<p>Balance (LATXW): ' + balanceLATXW + '</p>');
             if (balance > 0) {
-                var html = '<p><input class="form-control" style="width: 150px; display: inline;" type="text" id="withdrawAmount"> <button class="btn btn-default" onclick="withdrawLATXW();">Withdraw LATXW</button></p>';
+                var html = '<p><input class="form-control" style="width: 150px; display: inline;" type="text" id="withdrawAmount"> <button class="btn btn-default" onclick="App.withdrawLATXW();">Withdraw LATXW</button></p>';
                 if ($('#withdraw').html() != html) $('#withdraw').html(html);
             } else {
                 $('#withdraw').html('<p>You don\'t have any LATXW to withdraw.</p>');
@@ -94,7 +94,7 @@ window.App = {
                 var html = '<p><input class="form-control" style="width: 150px; display: inline;" type="text" id="depositAmount"> <button class="btn btn-default" onclick="App.sendLATX();">Send LATX</button></p>';
                 if ($('#sendLATX').html() != html) $('#sendLATX').html(html);
                 LATX.balanceOf(depositAddress, function (err, result) {
-                    var currentDeposit = web3.fromWei(result, "ether");
+                    var currentDeposit = new BigNumber(result).div(Math.pow(10, 8));
                     $('#currentDeposit').html('<p>Current deposit (LATX): ' + currentDeposit + '</p>');
                     if (currentDeposit > 0) {
                         $('#processDeposit').html('<p><button class="btn btn-default" onclick="App.processDeposit();">Process deposit</button></p>');
@@ -126,11 +126,12 @@ window.App = {
     },
 
     sendLATX: function () {
-        var amount = web3.toWei($('#depositAmount').val(), "ether");
+        var amountVal = $('#depositAmount').val();
+        var amount =  new BigNumber(amountVal).mult(Math.pow(10, 8));
         LATX.balanceOf(account, function (err, balance) {
             if (amount > balance) amount = balance;
             if (depositAddress && amount > 0) {
-                LATX.transfer(depositAddress, amount, {from: account, value: 0, gas: 300000}, function (err, result) {
+                LATX.transfer(depositAddress, amount.toString(), {from: account, value: 0, gas: 300000}, function (err, result) {
                     App.txSent(result);
                 });
             }
@@ -138,11 +139,11 @@ window.App = {
     },
 
     withdrawLATXW: function () {
-        var amount = web3.toWei($('#withdrawAmount').val(), "ether");
+        var amount = new BigNumber($('#withdrawAmount').val()).mult(Math.pow(10, 8));
         LATXW.balanceOf(account, function (err, balance) {
             if (amount > balance) amount = balance;
             if (amount > 0) {
-                LATXW.transfer(LATXW.address, amount, {from: account, value: 0, gas: 300000}, function (err, result) {
+                LATXW.transfer(LATXW.address, amount.toString(), {from: account, value: 0, gas: 300000}, function (err, result) {
                     App.txSent(result);
                 });
             }
