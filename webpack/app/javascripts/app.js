@@ -21,10 +21,10 @@ window.App = {
     start: function () {
         var self = this;
 
-        LATXWAddr = '0x13274fe19c0178208bcbee397af8167a7be27f6f';
+        LATXWAddr = '0x30253c71C615287fE968c77C5d6E472876654cB5';
         LATXW = web3.eth.contract(LATXWContract.abi).at(LATXWAddr);
 
-        LATXAddr = '0xeec918d74c746167564401103096d45bbd494b74';
+        LATXAddr = '0x676445b98b215367c4C8efDCAE660FE86379Cd64';
         LATX = web3.eth.contract(LATXContract.abi).at(LATXAddr);
 
         // Get the initial account balance so it can be displayed.
@@ -41,7 +41,6 @@ window.App = {
 
             accounts = accs;
             account = accounts[0];
-            console.log(accounts);
             $('#address').html(account);
             $('#addresses').html(accounts.map(function (account) {
                 return '<li><a href="javascript:;" onclick="selectAccount(\'' + account + '\')">' + account + '</a></li>'
@@ -116,12 +115,14 @@ window.App = {
     generateDepositAddress: function () {
         LATXW.createPersonalDepositAddress({from: account, value: 0, gas: 500000}, function (err, result) {
             App.txSent(result);
+            App.update();
         });
     },
 
     processDeposit: function () {
         LATXW.processDeposit({from: account, value: 0, gas: 300000}, function (err, result) {
             App.txSent(result);
+            App.update();
         });
     },
 
@@ -129,10 +130,11 @@ window.App = {
         var amountVal = $('#depositAmount').val();
         var amount =  new BigNumber(amountVal).mult(Math.pow(10, 8));
         LATX.balanceOf(account, function (err, balance) {
-            if (amount > balance) amount = balance;
+            if (amount.gt(balance)) amount = balance;
             if (depositAddress && amount > 0) {
                 LATX.transfer(depositAddress, amount.toString(), {from: account, value: 0, gas: 300000}, function (err, result) {
                     App.txSent(result);
+                    App.update();
                 });
             }
         })
@@ -141,10 +143,11 @@ window.App = {
     withdrawLATXW: function () {
         var amount = new BigNumber($('#withdrawAmount').val()).mult(Math.pow(10, 8));
         LATXW.balanceOf(account, function (err, balance) {
-            if (amount > balance) amount = balance;
+            if (amount.gt(balance)) amount = balance;
             if (amount > 0) {
                 LATXW.transfer(LATXW.address, amount.toString(), {from: account, value: 0, gas: 300000}, function (err, result) {
                     App.txSent(result);
+                    App.update();
                 });
             }
         })

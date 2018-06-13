@@ -15,7 +15,7 @@ contract LatiumX {
     event Transfer(address indexed _from, address indexed _to, uint _value);
 
     // transfer the balance from sender's account to another one
-    function transfer(address _to, uint256 _value);
+    function transfer(address _to, uint256 _value) public;
 }
 
 contract TokenInterface {
@@ -92,22 +92,23 @@ contract Token is TokenInterface {
 }
 
 contract DepositSlot {
-    address public constant LATX = 0xbbf289d846208c16edc8474705c748aff07732db;//0x2f85E502a988AF76f7ee6D83b7db8d6c0A823bf9;
+    address public LATX;
 
     address public wrapper;
 
     modifier onlyWrapper {
-        if (msg.sender != wrapper) throw;
+        require(msg.sender == wrapper);
         _;
     }
 
-    function DepositSlot(address _wrapper) public {
+    constructor(address _wrapper, address LATX_Address) public {
         wrapper = _wrapper;
+        LATX = LATX_Address;
     }
 
     function collect() public onlyWrapper {
         uint amount = TokenInterfaceLatium(LATX).balanceOf(this);
-        if (amount == 0) throw;
+        require (amount != 0);
 
         TokenInterfaceLatium(LATX).transfer(wrapper, amount);
     }
@@ -119,13 +120,17 @@ contract LatiumXTokenWrapped is Token {
     string public constant symbol = "LATXW";
     uint8 public constant decimals = 8;
 
-    address public constant LATX = 0xbbf289d846208c16edc8474705c748aff07732db;
+    address public LATX;
 
     mapping (address => address) depositSlots;
 
+    constructor(address LATX_Address) public{
+        LATX = LATX_Address;
+    }
+
     function createPersonalDepositAddress() public returns (address depositAddress) {
         if (depositSlots[msg.sender] == 0) {
-            depositSlots[msg.sender] = new DepositSlot(this);
+            depositSlots[msg.sender] = new DepositSlot(this, LATX);
         }
 
         return depositSlots[msg.sender];
@@ -138,12 +143,12 @@ contract LatiumXTokenWrapped is Token {
 
     function processDeposit() public {
         address depositSlot = depositSlots[msg.sender];
-        if (depositSlot == 0) throw;
+        require(depositSlot != 0);
 
         DepositSlot(depositSlot).collect();
 
         uint balance = TokenInterfaceLatium(LATX).balanceOf(this);
-        if (balance <= totalSupply) throw;
+        require(balance > totalSupply);
 
         uint freshLATXW = balance - totalSupply;
         totalSupply += freshLATXW;
@@ -151,8 +156,7 @@ contract LatiumXTokenWrapped is Token {
         emit Transfer(address(this), msg.sender, freshLATXW);
     }
 
-    function transfer(address _to,
-        uint256 _amount) public returns (bool success) {
+    function transfer(address _to, uint256 _amount) public returns (bool success) {
         if (_to == address(this)) {
             withdrawLATX(_amount);   // convert back to LATX
             return true;
@@ -164,13 +168,13 @@ contract LatiumXTokenWrapped is Token {
     function transferFrom(address _from,
         address _to,
         uint256 _amount) public returns (bool success) {
-        if (_to == address(this)) throw;        // not supported
+        require(_to != address(this));        // not supported
         return _transferFrom(_from, _to, _amount);
     }
 
 
     function withdrawLATX(uint amount) internal {
-        if (balances[msg.sender] < amount) throw;
+        require(balances[msg.sender] >= amount);
 
         balances[msg.sender] -= amount;
         totalSupply -= amount;
